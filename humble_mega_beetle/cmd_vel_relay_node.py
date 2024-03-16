@@ -16,14 +16,39 @@ class TopicRelay(Node):
         frame.is_extended = False
         frame.id = 0x123
         frame.dlc = 8
-        packed_data = struct.pack('ff', msg.linear.x, msg.angular.z)
-        frame.data = np.frombuffer(packed_data, dtype=np.uint8)
+
+        # Scale and convert the floating-point numbers to int16
+        linear_x_int = int(msg.linear.x * 100)
+        linear_y_int = int(msg.linear.y * 100)
+        angular_z_int = int(msg.angular.z * 100)
+
+        # Pack these integers into bytes using 'h' format for int16
+        packed_data = struct.pack('hhh', linear_x_int, linear_y_int, angular_z_int)
+
+        # Check if packed data exceeds 6 bytes (leaving 2 bytes for padding)
+        if len(packed_data) > 6:
+            self.get_logger().error('Packed data exceeds 6 bytes, unable to fit into CAN frame with padding.')
+            return
+        else:
+            # Ensure the packed data fits the CAN frame data size (8 bytes)
+            # Here, we fill the remaining 2 bytes with zeros
+            frame.data = np.frombuffer(packed_data + b'\x00\x00', dtype=np.uint8)
+
+        # Decode for logging (demonstration purposes)
+        decoded_linear_x_int, decoded_linear_y_int, decoded_angular_z_int = struct.unpack('hhh', packed_data)
+        self.get_logger().info(
+            f'Decoded Velocities: Linear X: {decoded_linear_x_int / 100.0}, '
+            f'Linear Y: {decoded_linear_y_int / 100.0}, Angular Z: {decoded_angular_z_int / 100.0}'
+        )
+
         self.publisher.publish(frame)
         self.get_logger().info('Published CAN Frame with encoded Twist message')
 
+
+
 def main(args=None):
     rclpy.init(args=args)
-    can_socket = 'vcan0'  # Default value, consider retrieving this from command line arguments or parameters
+    can_socket = 'vcan0'  # Default value
     relay_node = TopicRelay(can_socket)
 
     try:
