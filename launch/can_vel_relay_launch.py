@@ -7,8 +7,8 @@ def generate_launch_description():
         Node(
             package='ros2socketcan_bridge',
             executable='ros2socketcan',
-            name='ros2socketcan_bridge_vcan0',
-            parameters=[{'can_socket': 'vcan0'}],
+            name='ros2socketcan_bridge_can0',
+            parameters=[{'can_socket': 'can0'}],
         ),
         # Launch the ros2socketcan_bridge for vcan1
         # Node(
@@ -21,8 +21,8 @@ def generate_launch_description():
         Node(
             package='humble_mega_beetle',
             executable='cmd_vel_relay_node',
-            name='relay_node_vcan0',
-            parameters=[{'can_socket': 'vcan0'}],
+            name='relay_node_can0',
+            parameters=[{'can_socket': 'can0'}],
         ),
         # Launch relay node for vcan1
         # Node(

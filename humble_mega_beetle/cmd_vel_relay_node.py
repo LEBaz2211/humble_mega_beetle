@@ -15,7 +15,7 @@ class TopicRelay(Node):
         frame = Frame()
         frame.is_extended = False
         frame.id = 0x123
-        frame.dlc = 8
+        frame.dlc = 6
 
         # Scale and convert the floating-point numbers to int16
         linear_x_int = int(msg.linear.x * 100)
@@ -48,7 +48,7 @@ class TopicRelay(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    can_socket = 'vcan0'  # Default value
+    can_socket = 'can0'  # Default value
     relay_node = TopicRelay(can_socket)
 
     try:
